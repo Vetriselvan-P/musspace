@@ -13,7 +13,7 @@ export default async function handler(request, response) {
 
   try {
     const entry = {
-      id: crypto.randomUUID(),
+      id: Date.now() + Math.random().toString(36).substring(2),
       mood,
       timestamp: new Date().toISOString(),
     };
