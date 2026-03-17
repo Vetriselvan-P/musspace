@@ -1,4 +1,6 @@
-import { kv } from '@vercel/kv';
+import Redis from 'ioredis';
+
+const redis = new Redis(process.env.REDIS_URL);
 
 export default async function handler(request, response) {
   if (request.method !== 'GET') {
@@ -6,14 +8,16 @@ export default async function handler(request, response) {
   }
 
   try {
-    const history = await kv.lrange('mood_history', 0, 99);
+    const rawHistory = await redis.lrange('mood_history', 0, 99);
+    // Parse the stringified objects back to JSON
+    const history = rawHistory.map(item => JSON.parse(item));
+    
     return response.status(200).json({ history });
   } catch (error) {
     console.error('Error fetching history:', error);
     return response.status(500).json({ 
       error: 'Failed to fetch history', 
-      details: error.message,
-      code: error.code 
+      details: error.message 
     });
   }
 }

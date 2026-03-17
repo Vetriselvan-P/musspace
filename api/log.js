@@ -1,5 +1,7 @@
-import { kv } from '@vercel/kv';
-import crypto from 'crypto';
+import Redis from 'ioredis';
+
+// Use REDIS_URL from Vercel environment
+const redis = new Redis(process.env.REDIS_URL);
 
 export default async function handler(request, response) {
   if (request.method !== 'POST') {
@@ -19,16 +21,16 @@ export default async function handler(request, response) {
     };
 
     // Store in a list, keep last 100
-    await kv.lpush('mood_history', entry);
-    await kv.ltrim('mood_history', 0, 99);
+    // We stringify the object for Redis list storage
+    await redis.lpush('mood_history', JSON.stringify(entry));
+    await redis.ltrim('mood_history', 0, 99);
 
     return response.status(200).json({ success: true, entry });
   } catch (error) {
     console.error('Error logging mood:', error);
     return response.status(500).json({ 
       error: 'Failed to log mood', 
-      details: error.message,
-      code: error.code 
+      details: error.message 
     });
   }
 }
