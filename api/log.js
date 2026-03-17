@@ -1,4 +1,5 @@
 import { kv } from '@vercel/kv';
+import crypto from 'crypto';
 
 export default async function handler(request, response) {
   if (request.method !== 'POST') {
