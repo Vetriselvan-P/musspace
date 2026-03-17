@@ -12,12 +12,13 @@ function App() {
   const [showTracker, setShowTracker] = useState(false);
 
   const handleSelectMood = async (selectedMode) => {
+    console.log(`Setting mood to: ${selectedMode}`);
+    // 1. Vibe Tracker Persistence (Vercel KV) - Await to ensure it sends before room change
+    await saveMoodToTracker(selectedMode);
+
     setMode(selectedMode);
     setNotification(`Ping sent! You're feeling ${selectedMode} ✨`);
     
-    // 1. Vibe Tracker Persistence (Vercel KV)
-    saveMoodToTracker(selectedMode);
-
     // 2. Real-Time Discord Notification
     sendMoodNotification(selectedMode);
     
@@ -27,11 +28,14 @@ function App() {
 
   const saveMoodToTracker = async (mood) => {
     try {
-      await fetch('/api/log', {
+      console.log("Sending log to /api/log...");
+      const res = await fetch('/api/log', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ mood })
       });
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      console.log("Log saved successfully.");
     } catch (err) {
       console.error("Failed to log mood to tracker:", err);
     }
