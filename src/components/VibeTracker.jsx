@@ -14,15 +14,19 @@ const VibeTracker = ({ onBack }) => {
   const fetchHistory = async () => {
     try {
       const res = await fetch('/api/history');
-      if (!res.ok) throw new Error(`Status ${res.status}`);
       const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.details || data.error || `Status ${res.status}`);
+      }
+
       if (data.history) {
         setHistory(data.history);
         setError(null);
       }
     } catch (err) {
       console.error("Failed to load history:", err);
-      setError("Unable to reach the database. Please check if Vercel KV is connected.");
+      setError(`Sync Error: ${err.message}`);
     } finally {
       setLoading(false);
     }

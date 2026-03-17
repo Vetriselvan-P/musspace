@@ -25,6 +25,10 @@ export default async function handler(request, response) {
     return response.status(200).json({ success: true, entry });
   } catch (error) {
     console.error('Error logging mood:', error);
-    return response.status(500).json({ error: 'Failed to log mood' });
+    return response.status(500).json({ 
+      error: 'Failed to log mood', 
+      details: error.message,
+      code: error.code 
+    });
   }
 }
