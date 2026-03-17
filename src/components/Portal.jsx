@@ -1,12 +1,19 @@
 import React from 'react';
 
-const Portal = ({ onSelect }) => {
+const Portal = ({ onSelect, onShowTracker }) => {
   return (
     <div className="portal-container">
       <div className="portal-intro slide-up">
         <h1 className="main-title">Which side of you is here today?</h1>
         <p className="subtitle">Tap the door that feels like *you* right now.</p>
-        <div className="creator-credit">Blame <span className="glow-name">Vetri</span> for everything you see here.</div>
+        <div 
+          className="creator-credit" 
+          onClick={onShowTracker}
+          style={{ cursor: 'pointer' }}
+          title="Vibe History"
+        >
+          Blame <span className="glow-name">Vetri</span> for everything you see here.
+        </div>
       </div>
 
       <div className="selection-area">

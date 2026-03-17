@@ -3,21 +3,38 @@ import Portal from './components/Portal';
 import HyperRoom from './components/HyperRoom';
 import QuietRoom from './components/QuietRoom';
 import MoodNotifier from './components/MoodNotifier';
+import VibeTracker from './components/VibeTracker';
 import './index.css';
 
 function App() {
   const [mode, setMode] = useState('none'); // 'none', 'hyper', 'quiet'
   const [notification, setNotification] = useState(null);
+  const [showTracker, setShowTracker] = useState(false);
 
-  const handleSelectMood = (selectedMode) => {
+  const handleSelectMood = async (selectedMode) => {
     setMode(selectedMode);
     setNotification(`Ping sent! You're feeling ${selectedMode} ✨`);
     
-    // Real-Time Discord Notification
+    // 1. Vibe Tracker Persistence (Vercel KV)
+    saveMoodToTracker(selectedMode);
+
+    // 2. Real-Time Discord Notification
     sendMoodNotification(selectedMode);
     
     // Auto-clear notification
     setTimeout(() => setNotification(null), 3000);
+  };
+
+  const saveMoodToTracker = async (mood) => {
+    try {
+      await fetch('/api/log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mood })
+      });
+    } catch (err) {
+      console.error("Failed to log mood to tracker:", err);
+    }
   };
 
   const sendMoodNotification = async (mood) => {
@@ -47,16 +64,25 @@ function App() {
       <div className="bg-mesh"></div>
       {notification && <MoodNotifier message={notification} />}
       
-      {mode === 'none' && (
-        <Portal onSelect={handleSelectMood} />
-      )}
+      {showTracker ? (
+        <VibeTracker onBack={() => setShowTracker(false)} />
+      ) : (
+        <>
+          {mode === 'none' && (
+            <Portal 
+              onSelect={handleSelectMood} 
+              onShowTracker={() => setShowTracker(true)} 
+            />
+          )}
 
-      {mode === 'hyper' && (
-        <HyperRoom onBack={handleBack} />
-      )}
+          {mode === 'hyper' && (
+            <HyperRoom onBack={handleBack} />
+          )}
 
-      {mode === 'quiet' && (
-        <QuietRoom onBack={handleBack} />
+          {mode === 'quiet' && (
+            <QuietRoom onBack={handleBack} />
+          )}
+        </>
       )}
     </div>
   );
